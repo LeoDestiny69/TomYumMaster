@@ -14,7 +14,7 @@ export default function Main() {
 
           {/* Left: Text Content */}
           <div className="text-left lg:w-1/2">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-orange-600 mb-6 leading-tight drop-shadow-md">
+            <h1 className="font-bold text-5xl md:text-6xl lg:text-7xl font-extrabold text-orange-600 mb-6 leading-tight drop-shadow-md">
               Bold Flavors.<br />Thai Spirit. Taste the Mastery.
             </h1>
             <p className="text-lg md:text-2xl text-orange-800 leading-relaxed">

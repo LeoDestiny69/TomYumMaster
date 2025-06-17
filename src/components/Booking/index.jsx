@@ -42,8 +42,8 @@ export default function Booking() {
   };
 
   return (
-    <div className="min-h-screen bg-orange-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-xl">
+    <div className="min-h-screen bg-amber-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl">
         <h1 className="text-3xl font-extrabold text-center text-[#842000] mb-6">
           จองโต๊ะล่วงหน้า
         </h1>
@@ -86,7 +86,7 @@ export default function Booking() {
               value={form.datetime}
               min={getMinDateTime()}
               onChange={handleChange}
-              className="w-full rounded-xl px-4 py-2 bg-[#ff6b35] text-gray-800 border border-[#ffb088]"
+              className="w-full rounded-xl px-4 py-2 bg-[#ff6b35] text-white border border-[#ffb088]"
               required
             />
           </div>
