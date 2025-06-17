@@ -1,23 +1,40 @@
+// 1. เพิ่ม require('dotenv').config(); ไว้บนสุด
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2');
+const mysql = require('mysql2'); // ใช้ mysql2 ดีแล้วครับ
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// ข้อมูลล็อกอินแอดมิน (mock)
+// ข้อมูลล็อกอินแอดมิน (mock) - แนะนำให้ใช้ ENV VARS สำหรับ Production ด้วย
+// ตอนนี้ยังคง hardcode ไว้ตามเดิม แต่ใน Production จริง ควรใช้ ENV VARS สำหรับ username/password
 const adminUser = {
   username: 'admin',
   password: '1234'
 };
 
-// เชื่อมต่อฐานข้อมูล MySQL (XAMPP)
+// 2. ปรับการเชื่อมต่อฐานข้อมูล MySQL ให้ดึงค่าจาก Environment Variables
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'restaurant_db',
+  host: process.env.DB_HOST,       // ดึงจาก ENV
+  user: process.env.DB_USER,       // ดึงจาก ENV
+  password: process.env.DB_PASSWORD, // ดึงจาก ENV
+  database: process.env.DB_NAME,   // ดึงจาก ENV
+  port: process.env.DB_PORT || 3306 // ดึงจาก ENV ถ้ามี, ไม่งั้นใช้ 3306 เป็นค่า Default
+});
+
+// ตรวจสอบการเชื่อมต่อ
+db.connect(err => {
+  if (err) {
+    // เพิ่มรายละเอียด error เพื่อช่วย debug
+    console.error('❌ Error connecting to MySQL database:', err.stack);
+    console.error('Check your DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT environment variables.');
+    // อาจจะ exit process ถ้าเชื่อมต่อ DB ไม่ได้เลย
+    process.exit(1);
+  }
+  console.log('✅ Connected to MySQL database as id ' + db.threadId);
 });
 
 // ✅ POST: บันทึกข้อมูลจอง
@@ -90,7 +107,10 @@ app.post('/admin/login', (req, res) => {
   }
 });
 
-// ✅ Start Server
-app.listen(3001, () => {
-  console.log('🚀 Server running at http://localhost:3001');
+// 3. กำหนด Port ให้ดึงจาก Environment Variable ด้วย (สำคัญสำหรับ Hosting)
+// Render จะกำหนด PORT ให้คุณเองใน Production
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Access backend at http://localhost:${PORT}`);
 });
