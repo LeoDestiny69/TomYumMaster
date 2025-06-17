@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { CalendarDays, User, Phone, StickyNote } from 'lucide-react';
 
 export default function Booking() {
@@ -15,9 +16,8 @@ export default function Booking() {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     const now = new Date();
     const selected = new Date(form.datetime);
 
@@ -26,19 +26,19 @@ export default function Booking() {
       return;
     }
 
-    alert('🎉 จองเรียบร้อยแล้ว ขอบคุณค่ะ!');
-    setForm({
-      name: '',
-      phone: '',
-      datetime: '',
-      people: 1,
-      note: '',
-    });
+    try {
+      await axios.post('http://localhost:3001/api/bookings', form);
+      alert('🎉 จองเรียบร้อยแล้ว ขอบคุณค่ะ!');
+      setForm({ name: '', phone: '', datetime: '', people: 1, note: '' });
+    } catch (err) {
+      console.error('❌ Error:', err);
+      alert('❌ เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง');
+    }
   };
 
   const getMinDateTime = () => {
     const now = new Date();
-    return now.toISOString().slice(0, 16); // รูปแบบ: "YYYY-MM-DDTHH:MM"
+    return now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
   };
 
   return (
@@ -58,12 +58,12 @@ export default function Booking() {
               placeholder="ชื่อของคุณ"
               value={form.name}
               onChange={handleChange}
-              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088] focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088]"
               required
             />
           </div>
 
-          {/* เบอร์ */}
+          {/* เบอร์โทร */}
           <div className="flex items-center gap-2">
             <Phone className="text-[#b24c1a]" size={20} />
             <input
@@ -72,21 +72,21 @@ export default function Booking() {
               placeholder="เบอร์ติดต่อ"
               value={form.phone}
               onChange={handleChange}
-              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088] focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088]"
               required
             />
           </div>
 
           {/* วันเวลา */}
-          <div className="flex items-center gap-2 focus-within:text-[#ff6b35]">
-            <CalendarDays className="text-[#b24c1a] transition-colors duration-200" size={20} />
+          <div className="flex items-center gap-2">
+            <CalendarDays className="text-[#b24c1a]" size={20} />
             <input
               type="datetime-local"
               name="datetime"
               value={form.datetime}
               min={getMinDateTime()}
               onChange={handleChange}
-              className="w-full rounded-xl px-4 py-2 bg-[#ff6b35] text-gray-800 border border-[#ffb088] focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full rounded-xl px-4 py-2 bg-[#ff6b35] text-gray-800 border border-[#ffb088]"
               required
             />
           </div>
@@ -101,7 +101,7 @@ export default function Booking() {
               min={1}
               max={20}
               onChange={handleChange}
-              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088] focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088]"
               placeholder="จำนวนคน"
               required
             />
@@ -115,7 +115,7 @@ export default function Booking() {
               value={form.note}
               onChange={handleChange}
               placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"
-              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088] focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full rounded-xl px-4 py-2 bg-[#fff4ec] text-gray-800 border border-[#ffb088]"
             />
           </div>
 
@@ -123,7 +123,7 @@ export default function Booking() {
           <div className="text-center">
             <button
               type="submit"
-              className="btn btn-sm bg-[#ff6b35] hover:bg-[#e85c28] text-white rounded-xl px-6 py-2 shadow-md transition-all"
+              className="btn btn-sm bg-[#ff6b35] hover:bg-[#e85c28] text-white rounded-xl px-6 py-2 shadow-md"
             >
               ยืนยันการจอง
             </button>
