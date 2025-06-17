@@ -1,3 +1,7 @@
 @import "tailwindcss";
 @import "tailwindcss";
 @plugin "daisyui";
+
+body {
+  background-color: #fff7ed; /* เทียบเท่า Tailwind `bg-orange-50` */
+}

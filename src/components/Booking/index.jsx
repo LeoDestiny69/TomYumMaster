@@ -22,7 +22,7 @@ export default function Booking() {
     const selected = new Date(form.datetime);
 
     if (selected < now) {
-      alert('⛔️ กรุณาเลือกวันและเวลาในอนาคตเท่านั้น');
+      alert('⛔️ กรุณาเลือกวันและเวลาให้ถูกต้อง');
       return;
     }
 
