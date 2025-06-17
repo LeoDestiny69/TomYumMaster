@@ -1,0 +1,11 @@
+# ไม่สนใจไฟล์ .log
+*.log
+
+# ไม่สนใจโฟลเดอร์ node_modules
+node_modules/
+
+# ไม่สนใจไฟล์ .env
+.env
+
+# ไม่สนใจโฟลเดอร์ build
+build/
