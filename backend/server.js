@@ -17,34 +17,45 @@ const adminUser = {
 };
 
 // 2. ปรับการเชื่อมต่อฐานข้อมูล MySQL ให้ดึงค่าจาก Environment Variables
-const db = mysql.createConnection({
+// **เปลี่ยนจาก mysql.createConnection เป็น mysql.createPool**
+const pool = mysql.createPool({ // <--- เปลี่ยนตรงนี้
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT || 4000, // <--- เปลี่ยนค่า Default PORT เป็น 4000 (สำหรับ TiDB Cloud)
-  ssl: {                             // <--- เพิ่มส่วนนี้เข้ามา
-    rejectUnauthorized: true,        // ควรเป็น true เพื่อความปลอดภัย แต่ถ้ามีปัญหา ให้ลองเป็น false ชั่วคราว
-  }
+  ssl: {
+    rejectUnauthorized: true, // ควรเป็น true เพื่อความปลอดภัย แต่ถ้ามีปัญหา ให้ลองเป็น false ชั่วคราว
+  },
+  // **เพิ่มการตั้งค่าสำหรับ Connection Pool เพื่อจัดการ Idle Timeout**
+  waitForConnections: true,     // ถ้าไม่มี connection ว่าง ให้รอ
+  connectionLimit: 10,          // จำนวน connection สูงสุดใน pool (ปรับได้ตามความเหมาะสม)
+  queueLimit: 0,                // จำนวน request ที่สามารถเข้าคิวได้ (0 คือไม่จำกัด)
+  idleTimeout: 600000,          // 10 นาที (600,000 มิลลิวินาที) - ถ้าไม่มี Activity จะปิด Connection
+  enableKeepAlive: true,        // เปิดใช้งาน Keep-Alive เพื่อป้องกัน Connection ถูกตัด
+  keepAliveInitialDelay: 0,     // เริ่มส่งสัญญาณ Keep-Alive ทันที
 });
 
-// ตรวจสอบการเชื่อมต่อ
-db.connect(err => {
+// ตรวจสอบการเชื่อมต่อ Pool (ไม่ใช่ Connection เดี่ยวๆ)
+pool.getConnection(err => { // <--- เปลี่ยนเป็น pool.getConnection
   if (err) {
     // เพิ่มรายละเอียด error เพื่อช่วย debug
-    console.error('❌ Error connecting to MySQL database:', err.stack);
-    console.error('Check your DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT environment variables, and SSL configuration.'); // เพิ่ม SSL ในข้อความเตือน
+    console.error('❌ Error getting connection from MySQL pool:', err.stack); // <--- แก้ข้อความ Log
+    console.error('Check your DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT environment variables, and SSL configuration.');
     // อาจจะ exit process ถ้าเชื่อมต่อ DB ไม่ได้เลย
     process.exit(1);
   }
-  console.log('✅ Connected to MySQL database as id ' + db.threadId);
+  console.log('✅ MySQL connection pool established.'); // <--- แก้ข้อความ Log
 });
+
+
+// **สำคัญ: เปลี่ยน db.query ทั้งหมดเป็น pool.query**
 
 // ✅ POST: บันทึกข้อมูลจอง
 app.post('/api/bookings', (req, res) => {
   const { name, phone, datetime, people, note } = req.body;
   const sql = 'INSERT INTO bookings (name, phone, datetime, people, note) VALUES (?, ?, ?, ?, ?)';
-  db.query(sql, [name, phone, datetime, people, note], (err, result) => {
+  pool.query(sql, [name, phone, datetime, people, note], (err, result) => { // <--- เปลี่ยนตรงนี้
     if (err) {
       console.error('❌ Database insert error:', err);
       return res.status(500).json({ error: 'Database insert error' });
@@ -56,7 +67,7 @@ app.post('/api/bookings', (req, res) => {
 // ✅ GET: ดึงรายการจองทั้งหมด
 app.get('/api/bookings', (req, res) => {
   const sql = 'SELECT * FROM bookings ORDER BY datetime DESC';
-  db.query(sql, (err, results) => {
+  pool.query(sql, (err, results) => { // <--- เปลี่ยนตรงนี้
     if (err) {
       console.error('❌ Database read error:', err);
       return res.status(500).json({ error: 'Database read error' });
@@ -69,7 +80,7 @@ app.get('/api/bookings', (req, res) => {
 app.delete('/api/bookings/:id', (req, res) => {
   const { id } = req.params;
   const sql = 'DELETE FROM bookings WHERE id = ?';
-  db.query(sql, [id], (err, result) => {
+  pool.query(sql, [id], (err, result) => { // <--- เปลี่ยนตรงนี้
     if (err) {
       console.error('❌ Database delete error:', err);
       return res.status(500).json({ error: 'Database delete error' });
@@ -86,7 +97,7 @@ app.put('/api/bookings/:id', (req, res) => {
   const { id } = req.params;
   const { name, phone, datetime, people, note } = req.body;
   const sql = 'UPDATE bookings SET name = ?, phone = ?, datetime = ?, people = ?, note = ? WHERE id = ?';
-  db.query(sql, [name, phone, datetime, people, note, id], (err, result) => {
+  pool.query(sql, [name, phone, datetime, people, note, id], (err, result) => { // <--- เปลี่ยนตรงนี้
     if (err) {
       console.error('❌ Database update error:', err);
       return res.status(500).json({ error: 'Database update error' });
