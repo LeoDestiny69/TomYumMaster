@@ -18,11 +18,14 @@ const adminUser = {
 
 // 2. ปรับการเชื่อมต่อฐานข้อมูล MySQL ให้ดึงค่าจาก Environment Variables
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,       // ดึงจาก ENV
-  user: process.env.DB_USER,       // ดึงจาก ENV
-  password: process.env.DB_PASSWORD, // ดึงจาก ENV
-  database: process.env.DB_NAME,   // ดึงจาก ENV
-  port: process.env.DB_PORT || 3306 // ดึงจาก ENV ถ้ามี, ไม่งั้นใช้ 3306 เป็นค่า Default
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 4000, // <--- เปลี่ยนค่า Default PORT เป็น 4000 (สำหรับ TiDB Cloud)
+  ssl: {                             // <--- เพิ่มส่วนนี้เข้ามา
+    rejectUnauthorized: true,        // ควรเป็น true เพื่อความปลอดภัย แต่ถ้ามีปัญหา ให้ลองเป็น false ชั่วคราว
+  }
 });
 
 // ตรวจสอบการเชื่อมต่อ
@@ -30,7 +33,7 @@ db.connect(err => {
   if (err) {
     // เพิ่มรายละเอียด error เพื่อช่วย debug
     console.error('❌ Error connecting to MySQL database:', err.stack);
-    console.error('Check your DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT environment variables.');
+    console.error('Check your DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT environment variables, and SSL configuration.'); // เพิ่ม SSL ในข้อความเตือน
     // อาจจะ exit process ถ้าเชื่อมต่อ DB ไม่ได้เลย
     process.exit(1);
   }
