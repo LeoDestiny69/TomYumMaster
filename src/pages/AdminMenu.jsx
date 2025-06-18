@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { CalendarDays, User, Phone, StickyNote } from 'lucide-react'; // เพิ่ม import สำหรับไอคอนใน Modal (ถ้ายังไม่มี)
+import { CalendarDays, User, Phone, StickyNote } from 'lucide-react';
 
 function AdminMenu({ onLogout }) {
   const [tab, setTab] = useState('bookings');
@@ -280,43 +280,34 @@ function AddBookingModal({ onClose, onSave }) {
   );
 }
 
-// Component Modal ทั่วไป (ปรับปรุงให้มี Animation และ Backdrop Blur)
 function Modal({ onClose, title, onSubmit, children, primaryColor = 'orange' }) {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // Trigger animation when modal is mounted
     setIsOpen(true);
-    // ป้องกันการ Scroll ด้านหลังเมื่อ Modal เปิด
     document.body.style.overflow = 'hidden';
     return () => {
-      // คืนค่าการ Scroll เมื่อ Modal ปิด
       document.body.style.overflow = 'unset';
     };
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
-    // รอ Animation จบก่อนเรียก onClose ของ Component แม่
-    setTimeout(onClose, 300); // 300ms ควรจะตรงกับ transition duration
+    setTimeout(onClose, 300);
   };
 
   const colorClass = primaryColor === 'green' ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700';
 
   return (
-    // Backdrop overlay: มี opacity และ backdrop-blur เพื่อให้เห็นหน้าหลังจางๆ
-    // transition-opacity สำหรับการ Fade-in/out ของ Backdrop
     <div
       className={`fixed inset-0 bg-black flex justify-center items-center z-50
                   transition-opacity duration-300
                   ${isOpen ? 'bg-opacity-50 backdrop-blur-sm' : 'bg-opacity-0 pointer-events-none'}`}
-      onClick={handleClose} // คลิกที่พื้นหลัง Modal เพื่อปิด
+      onClick={handleClose}
     >
       <form
         onSubmit={onSubmit}
-        // ป้องกัน Modal ปิดเมื่อคลิกภายใน Form
         onClick={(e) => e.stopPropagation()}
-        // Modal content: มี Scale และ Opacity transition เพื่อให้ "เด้ง" ขึ้นมา
         className={`bg-white p-6 rounded-lg shadow-xl w-full max-w-md
                     transform transition-all duration-300
                     ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
@@ -326,7 +317,7 @@ function Modal({ onClose, title, onSubmit, children, primaryColor = 'orange' }) 
         <div className="flex justify-end space-x-2 mt-4">
           <button
             type="button"
-            onClick={handleClose} // ใช้ handleClose ที่มี Timeout
+            onClick={handleClose}
             className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
           >
             ยกเลิก
@@ -343,7 +334,7 @@ function Modal({ onClose, title, onSubmit, children, primaryColor = 'orange' }) 
   );
 }
 
-// Component สำหรับ Form การจอง (ใช้ซ้ำใน Modal เพิ่ม/แก้ไข)
+// Component สำหรับ Form การจอง (แก้สีข้อความใน Input เป็น text-black)
 function BookingForm({ formData, handleChange, getMinDateTime }) {
   return (
     <>
@@ -354,18 +345,18 @@ function BookingForm({ formData, handleChange, getMinDateTime }) {
           name="name"
           value={formData.name}
           onChange={handleChange}
-          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#E4572E]"
+          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-black focus:outline-none focus:ring-2 focus:ring-[#E4572E]" // เปลี่ยนเป็น text-black
           required
         />
       </label>
       <label className="block mb-2 text-[#4D2C1D] text-sm font-medium">
         เบอร์โทร:
         <input
-          type="tel" // เปลี่ยนเป็น type="tel" สำหรับเบอร์โทร
+          type="tel"
           name="phone"
           value={formData.phone}
           onChange={handleChange}
-          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#E4572E]"
+          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-black focus:outline-none focus:ring-2 focus:ring-[#E4572E]" // เปลี่ยนเป็น text-black
           required
         />
       </label>
@@ -377,7 +368,7 @@ function BookingForm({ formData, handleChange, getMinDateTime }) {
           value={formData.datetime}
           onChange={handleChange}
           min={getMinDateTime ? getMinDateTime() : undefined}
-          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#E4572E]"
+          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-black focus:outline-none focus:ring-2 focus:ring-[#E4572E]" // เปลี่ยนเป็น text-black
           required
         />
       </label>
@@ -387,10 +378,10 @@ function BookingForm({ formData, handleChange, getMinDateTime }) {
           type="number"
           name="people"
           min="1"
-          max="20" // เพิ่ม max
+          max="20"
           value={formData.people}
           onChange={handleChange}
-          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#E4572E]"
+          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-black focus:outline-none focus:ring-2 focus:ring-[#E4572E]" // เปลี่ยนเป็น text-black
           required
         />
       </label>
@@ -400,7 +391,7 @@ function BookingForm({ formData, handleChange, getMinDateTime }) {
           name="note"
           value={formData.note}
           onChange={handleChange}
-          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#E4572E]"
+          className="w-full border border-[#FF6F3C] rounded px-3 py-2 mt-1 bg-[#FFF4EC] text-black focus:outline-none focus:ring-2 focus:ring-[#E4572E]" // เปลี่ยนเป็น text-black
         />
       </label>
     </>
