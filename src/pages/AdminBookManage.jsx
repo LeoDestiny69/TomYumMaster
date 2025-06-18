@@ -18,7 +18,8 @@ export default function AdminBookingManagement() {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get('http://localhost:3001/api/bookings');
+      // แก้ไขตรงนี้
+      const res = await axios.get('https://tomyummaster.onrender.com/api/bookings');
       setBookings(res.data);
     } catch (error) {
       alert('ไม่สามารถโหลดข้อมูลการจองได้');
@@ -56,7 +57,8 @@ export default function AdminBookingManagement() {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:3001/api/bookings/${editingBooking.id}`, formData);
+      // แก้ไขตรงนี้
+      await axios.put(`https://tomyummaster.onrender.com/api/bookings/${editingBooking.id}`, formData);
       alert('อัปเดตข้อมูลสำเร็จ');
       cancelEdit();
       fetchBookings();
@@ -68,7 +70,8 @@ export default function AdminBookingManagement() {
   const handleDelete = async (id) => {
     if (!window.confirm('ยืนยันการลบรายการจองนี้?')) return;
     try {
-      await axios.delete(`http://localhost:3001/api/bookings/${id}`);
+      // แก้ไขตรงนี้
+      await axios.delete(`https://tomyummaster.onrender.com/api/bookings/${id}`);
       alert('ลบรายการจองสำเร็จ');
       fetchBookings();
     } catch (error) {

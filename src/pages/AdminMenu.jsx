@@ -11,7 +11,7 @@ function AdminMenu({ onLogout }) {
 
   const loadBookings = () => {
     setLoading(true);
-    axios.get('http://localhost:3001/api/bookings')
+    axios.get('https://tomyummaster.onrender.com/api/bookings') // <-- แก้ไขตรงนี้
       .then(res => setBookings(res.data))
       .catch(err => {
         console.error(err);
@@ -26,7 +26,7 @@ function AdminMenu({ onLogout }) {
 
   const handleDelete = (id) => {
     if (window.confirm('คุณแน่ใจจะลบการจองนี้?')) {
-      axios.delete(`http://localhost:3001/api/bookings/${id}`)
+      axios.delete(`https://tomyummaster.onrender.com/api/bookings/${id}`) // <-- แก้ไขตรงนี้
         .then(() => {
           alert('ลบรายการสำเร็จ');
           loadBookings();
@@ -36,7 +36,7 @@ function AdminMenu({ onLogout }) {
   };
 
   const handleSaveEdit = (updatedBooking) => {
-    axios.put(`http://localhost:3001/api/bookings/${updatedBooking.id}`, updatedBooking)
+    axios.put(`https://tomyummaster.onrender.com/api/bookings/${updatedBooking.id}`, updatedBooking) // <-- แก้ไขตรงนี้
       .then(() => {
         alert('แก้ไขข้อมูลสำเร็จ');
         setEditBooking(null);
@@ -185,7 +185,7 @@ function AdminMenu({ onLogout }) {
         <AddBookingModal
           onClose={() => setShowAddModal(false)}
           onSave={(newBooking) => {
-            axios.post('http://localhost:3001/api/bookings', {
+            axios.post('https://tomyummaster.onrender.com/api/bookings', { // <-- แก้ไขตรงนี้
               ...newBooking,
               datetime: new Date(newBooking.datetime).toISOString()
             })

@@ -27,7 +27,7 @@ export default function Booking() {
     }
 
     try {
-      await axios.post('http://localhost:3001/api/bookings', form);
+      await axios.post('https://tomyummaster.onrender.com/api/bookings', form);
       alert('🎉 จองเรียบร้อยแล้ว ขอบคุณค่ะ!');
       setForm({ name: '', phone: '', datetime: '', people: 1, note: '' });
     } catch (err) {
