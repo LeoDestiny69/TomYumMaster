@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { CalendarDays, User, Phone, StickyNote } from 'lucide-react'; // เพิ่ม import สำหรับไอคอนใน Modal
 
 function AdminMenu({ onLogout }) {
   const [tab, setTab] = useState('bookings');
@@ -9,42 +10,74 @@ function AdminMenu({ onLogout }) {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
 
+  // ฟังก์ชันโหลดข้อมูลการจอง
   const loadBookings = () => {
     setLoading(true);
-    axios.get('https://tomyummaster.onrender.com/api/bookings') // <-- แก้ไขตรงนี้
+    // URL Hardcode
+    axios.get('https://tomyummaster.onrender.com/api/bookings')
       .then(res => setBookings(res.data))
       .catch(err => {
-        console.error(err);
+        console.error("Error loading bookings:", err);
         alert("ไม่สามารถโหลดข้อมูลการจองได้");
       })
       .finally(() => setLoading(false));
   };
 
+  // เรียกใช้เมื่อ tab เปลี่ยนเป็น 'bookings'
   useEffect(() => {
     if (tab === 'bookings') loadBookings();
   }, [tab]);
 
+  // ฟังก์ชันลบรายการจอง
   const handleDelete = (id) => {
     if (window.confirm('คุณแน่ใจจะลบการจองนี้?')) {
-      axios.delete(`https://tomyummaster.onrender.com/api/bookings/${id}`) // <-- แก้ไขตรงนี้
+      // URL Hardcode
+      axios.delete(`https://tomyummaster.onrender.com/api/bookings/${id}`)
         .then(() => {
           alert('ลบรายการสำเร็จ');
-          loadBookings();
+          loadBookings(); // โหลดข้อมูลใหม่หลังจากลบ
         })
-        .catch(() => alert('ลบไม่สำเร็จ'));
+        .catch(err => {
+          console.error("Error deleting booking:", err);
+          alert('ลบไม่สำเร็จ');
+        });
     }
   };
 
+  // ฟังก์ชันบันทึกการแก้ไขการจอง
   const handleSaveEdit = (updatedBooking) => {
-    axios.put(`https://tomyummaster.onrender.com/api/bookings/${updatedBooking.id}`, updatedBooking) // <-- แก้ไขตรงนี้
+    // URL Hardcode
+    axios.put(`https://tomyummaster.onrender.com/api/bookings/${updatedBooking.id}`, updatedBooking)
       .then(() => {
         alert('แก้ไขข้อมูลสำเร็จ');
-        setEditBooking(null);
-        loadBookings();
+        setEditBooking(null); // ปิด Modal แก้ไข
+        loadBookings(); // โหลดข้อมูลใหม่หลังจากแก้ไข
       })
-      .catch(() => alert('แก้ไขไม่สำเร็จ'));
+      .catch(err => {
+        console.error("Error saving edit:", err);
+        alert('แก้ไขไม่สำเร็จ');
+      });
   };
 
+  // ฟังก์ชันเพิ่มการจอง (เรียกจาก AddBookingModal)
+  const handleAddBooking = (newBooking) => {
+    // URL Hardcode
+    axios.post('https://tomyummaster.onrender.com/api/bookings', {
+      ...newBooking,
+      datetime: new Date(newBooking.datetime).toISOString() // แปลง datetime เป็น ISO string
+    })
+      .then(() => {
+        alert('เพิ่มการจองสำเร็จ');
+        setShowAddModal(false); // ปิด Modal เพิ่ม
+        loadBookings(); // โหลดข้อมูลใหม่หลังจากเพิ่ม
+      })
+      .catch(err => {
+        console.error("Error adding booking:", err);
+        alert('เพิ่มการจองไม่สำเร็จ');
+      });
+  };
+
+  // กรองข้อมูลการจองตามคำค้นหา
   const filteredBookings = bookings.filter(b =>
     b.name.toLowerCase().includes(search.toLowerCase()) ||
     b.phone.includes(search)
@@ -173,6 +206,7 @@ function AdminMenu({ onLogout }) {
         </div>
       </div>
 
+      {/* Modal แก้ไขการจอง */}
       {editBooking && (
         <EditBookingModal
           booking={editBooking}
@@ -181,34 +215,25 @@ function AdminMenu({ onLogout }) {
         />
       )}
 
+      {/* Modal เพิ่มการจอง */}
       {showAddModal && (
         <AddBookingModal
           onClose={() => setShowAddModal(false)}
-          onSave={(newBooking) => {
-            axios.post('https://tomyummaster.onrender.com/api/bookings', { // <-- แก้ไขตรงนี้
-              ...newBooking,
-              datetime: new Date(newBooking.datetime).toISOString()
-            })
-              .then(() => {
-                alert('เพิ่มการจองสำเร็จ');
-                setShowAddModal(false);
-                loadBookings();
-              })
-              .catch(() => alert('เพิ่มการจองไม่สำเร็จ'));
-          }}
+          onSave={handleAddBooking} // เรียกใช้ handleAddBooking ที่สร้างไว้ด้านบน
         />
       )}
     </div>
   );
 }
 
-// ================= MODALS =================
+// ================= MODALS COMPONENTS =================
 
 function EditBookingModal({ booking, onClose, onSave }) {
   const [formData, setFormData] = useState({
     name: booking.name,
     phone: booking.phone,
-    datetime: booking.datetime.slice(0, 16),
+    // แปลง datetime กลับเป็นรูปแบบที่ input type="datetime-local" ต้องการ
+    datetime: new Date(booking.datetime).toISOString().slice(0, 16),
     people: booking.people,
     note: booking.note || '',
   });
@@ -220,6 +245,7 @@ function EditBookingModal({ booking, onClose, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // ส่งข้อมูลกลับไปพร้อมแปลง datetime เป็น ISO string อีกครั้ง
     onSave({
       id: booking.id,
       ...formData,
@@ -238,7 +264,7 @@ function AddBookingModal({ onClose, onSave }) {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    datetime: '',
+    datetime: '', // ค่าเริ่มต้นว่างเปล่า
     people: 1,
     note: '',
   });
@@ -250,22 +276,32 @@ function AddBookingModal({ onClose, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // ส่งข้อมูลกลับไปพร้อมแปลง datetime เป็น ISO string
     onSave({
       ...formData,
       datetime: new Date(formData.datetime).toISOString()
     });
   };
 
+  // คำนวณ min datetime สำหรับ input
+  const getMinDateTime = () => {
+    const now = new Date();
+    return now.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
+  };
+
   return (
     <Modal onClose={onClose} title="เพิ่มการจอง" onSubmit={handleSubmit} primaryColor="green">
-      <BookingForm formData={formData} handleChange={handleChange} />
+      {/* ส่ง getMinDateTime ไปยัง BookingForm เพื่อตั้งค่า min attribute */}
+      <BookingForm formData={formData} handleChange={handleChange} getMinDateTime={getMinDateTime} />
     </Modal>
   );
 }
 
+// Component Modal ทั่วไป (มีพื้นหลังโปร่งแสง)
 function Modal({ onClose, title, onSubmit, children, primaryColor = 'orange' }) {
   const colorClass = primaryColor === 'green' ? 'bg-green-600 hover:bg-green-700' : 'bg-orange-600 hover:bg-orange-700';
   return (
+    // นี่คือส่วนที่ทำให้พื้นหลังเป็นสีดำโปร่งแสง 50%
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <form onSubmit={onSubmit} className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
         <h3 className="text-xl font-bold mb-4">{title}</h3>
@@ -290,7 +326,8 @@ function Modal({ onClose, title, onSubmit, children, primaryColor = 'orange' }) 
   );
 }
 
-function BookingForm({ formData, handleChange }) {
+// Component สำหรับ Form การจอง (ใช้ซ้ำใน Modal เพิ่ม/แก้ไข)
+function BookingForm({ formData, handleChange, getMinDateTime }) {
   return (
     <>
       <label className="block mb-2">
@@ -322,6 +359,8 @@ function BookingForm({ formData, handleChange }) {
           name="datetime"
           value={formData.datetime}
           onChange={handleChange}
+          // ใช้ getMinDateTime ที่ส่งมาจาก AddBookingModal สำหรับ Modal เพิ่มการจอง
+          min={getMinDateTime ? getMinDateTime() : undefined} 
           className="w-full border rounded px-3 py-2 mt-1"
           required
         />
