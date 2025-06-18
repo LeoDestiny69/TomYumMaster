@@ -9,12 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ข้อมูลล็อกอินแอดมิน (mock) - แนะนำให้ใช้ ENV VARS สำหรับ Production ด้วย
-// ตอนนี้ยังคง hardcode ไว้ตามเดิม แต่ใน Production จริง ควรใช้ ENV VARS สำหรับ username/password
-const adminUser = {
-  username: 'admin',
-  password: '1234'
-};
+// **ลบข้อมูลล็อกอินแอดมิน (mock) แบบ hardcode ออกไป**
+// const adminUser = {
+//   username: 'admin',
+//   password: '1234'
+// };
 
 // 2. ปรับการเชื่อมต่อฐานข้อมูล MySQL ให้ดึงค่าจาก Environment Variables
 // **เปลี่ยนจาก mysql.createConnection เป็น mysql.createPool**
@@ -45,7 +44,7 @@ pool.getConnection(err => { // <--- เปลี่ยนเป็น pool.getCo
     // อาจจะ exit process ถ้าเชื่อมต่อ DB ไม่ได้เลย
     process.exit(1);
   }
-  console.log('✅ MySQL connection pool established.'); // <--- แก้ข้อความ Log
+  console.log('✅ MySQL connection pool established.'); // <--- แก้ไข Log message
 });
 
 
@@ -109,16 +108,30 @@ app.put('/api/bookings/:id', (req, res) => {
   });
 });
 
-// ✅ POST: เข้าสู่ระบบแอดมิน
+// ✅ POST: เข้าสู่ระบบแอดมิน (ดึงจาก DB - Plain Text Password)
 app.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
-  console.log('🛂 Admin Login Attempt:', username, password);
+  console.log('🛂 Admin Login Attempt:', username); // ไม่ควร Log password
 
-  if (username === adminUser.username && password === adminUser.password) {
+  // Query เพื่อค้นหา admin user ด้วย username และ password โดยตรง
+  const sql = 'SELECT id, username FROM admins WHERE username = ? AND password = ?';
+  pool.query(sql, [username, password], (err, results) => { // ส่ง username และ password เป็น parameter
+    if (err) {
+      console.error('❌ Database query error during admin login:', err);
+      return res.status(500).json({ success: false, message: 'Database error during login' });
+    }
+
+    // ถ้าไม่พบ user หรือ username/password ไม่ตรงกัน
+    if (results.length === 0) {
+      console.log('🚫 Admin Login Failed: Invalid credentials for', username);
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
+
+    // ถ้า Login สำเร็จ
+    console.log('✅ Admin Login Success:', username);
+    // ใน Production ควรสร้าง JWT Token จริงๆ แทน mock-admin-token
     res.json({ success: true, token: 'mock-admin-token' });
-  } else {
-    res.status(401).json({ success: false, message: 'Invalid credentials' });
-  }
+  });
 });
 
 // 3. กำหนด Port ให้ดึงจาก Environment Variable ด้วย (สำคัญสำหรับ Hosting)
