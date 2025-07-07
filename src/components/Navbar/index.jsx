@@ -17,7 +17,7 @@ export default function Navbar({ onAdminLoginClick }) {
         <button
           className="btn btn-outline btn-sm"
           onClick={() => {
-          console.log('🔐 Admin Login Clicked'); // ✅ ลองดูว่าขึ้นไหม
+          console.log('🔐 Admin Login Clicked'); 
           onAdminLoginClick();
           }}
 >
