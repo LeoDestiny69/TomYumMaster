@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '', // ถ้าใช้ XAMPP ปกติจะว่าง
+  password: '', 
   database: 'restaurant_db',
 });
 

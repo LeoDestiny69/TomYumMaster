@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Caprasimo&family=Mitr:wght@200;300;400;500;600;700&family=Rubik:ital,wght@0,701;1,701&display=swap');
+@import "tailwindcss";
+@import "tailwindcss";
+@plugin "daisyui";
+
+@theme {
+  --font-sans: "Mitr", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --font-heading: "Caprasimo", cursive; 
+
+  --font-body: "Rubik", sans-serif; 
+
+}
+
+@font-face {
+  font-family: Rubik;
+  src: url("src\assets\fonts\Rubik");
+  font-weight: 200 700;
+}
+
+
+body {
+  background-color: #fff7ed; 
+  
+}
