@@ -1,41 +1,32 @@
-services:
-  services:
-  nginx:
-    image: nginx:alpine
+version: '3.8' 
+services:  
+  nginx: 
+    image: nginx:alpine 
     container_name: my-app-nginx
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      # หากโฟลเดอร์ certs ที่มีอยู่เดิมของคุณเป็นที่ว่างสำหรับ Certbot ให้ใช้
-      - ./certs:/etc/letsencrypt/live/tomyummaster.duckdns.org:rw # Mount ไปยังที่ Certbot จะสร้าง
-      - ./certs-archive:/etc/letsencrypt/archive:rw # สร้างโฟลเดอร์ใหม่สำหรับ archive
-      # แก้ไข /var/www/html ให้ชี้ไปที่โฟลเดอร์ที่เขียนได้บน Host
-      # ตัวอย่าง: สร้างโฟลเดอร์ data/web ใน TomYumMaster แล้ว Mount เข้าไป
-      - ./data/web:/var/www/html:rw # เปลี่ยนจาก ro เป็น rw ชั่วคราวเพื่อให้ Certbot เขียนได้
-      # หาก Certbot สร้าง options-ssl-nginx.conf และ ssl-dhparams.pem คุณต้อง Mount โฟลเดอร์นั้นด้วย
-      # เช่น - ./certs/configs/:/etc/letsencrypt/:ro  (หาก Certbot สร้างไว้ใน .certs/configs)
-      # หรือถ้า Certbot สร้างไว้ใน /etc/letsencrypt บน Host:
-      - /etc/letsencrypt/options-ssl-nginx.conf:/etc/nginx/options-ssl-nginx.conf:ro
-      - /etc/letsencrypt/ssl-dhparams.pem:/etc/nginx/ssl-dhparams.pem:ro
-
+      - ./certs:/etc/letsencrypt/live/tomyummaster.duckdns.org:rw
+      - ./certs-archive:/etc/letsencrypt/archive:rw
+      - ./data/web:/var/www/html:rw
     depends_on:
       - frontend_service
       - backend_service_1
     networks:
       - my-app-network
 
-  frontend_service:
-    build:
+  frontend_service: 
+    build: 
       context: ./frontend
       dockerfile: Dockerfile
     container_name: my-app-frontend
     networks:
       - my-app-network
 
-  backend_service_1:
-    build:
+  backend_service_1: 
+    build: 
       context: ./backend
       dockerfile: Dockerfile
     container_name: my-app-backend-1
@@ -44,6 +35,6 @@ services:
     networks:
       - my-app-network
 
-networks:
-  my-app-network:
-    driver: bridge
+networks: 
+  my-app-network: 
+    driver: bridge 
