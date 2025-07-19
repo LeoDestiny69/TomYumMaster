@@ -31,7 +31,8 @@ export default function Navbar({ onAdminLoginClick }) {
       <div className="md:hidden flex items-center">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="btn btn-ghost btn-sm"
+          className="btn btn-ghost p-2 rounded-md"
+          style={{ fontSize: '1.75rem', padding: '0.5rem 1rem' }}
         >
           ☰
         </button>
